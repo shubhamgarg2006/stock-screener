@@ -1,6 +1,12 @@
 {
+<<<<<<< HEAD
   "built_at": "2026-08-10T05:44:00.360270+00:00",
   "universe_size": 204,
   "pe_history_tickers": 109,
+=======
+  "built_at": "2026-08-10T05:49:40.351504+00:00",
+  "universe_size": 312,
+  "pe_history_tickers": 169,
+>>>>>>> 20e6ea04a8fc2f1ef6d6d767ecce36811cc46ed2
   "years_of_pe_history": 5
 }
