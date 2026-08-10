@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Equity Screener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="tape-wrap" id="tapeWrap" aria-label="Starred tickers ticker tape">
+  <div class="tape" id="tape">
+    <span class="tape-empty">Star a ticker to pin it here —</span>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-mark">§</span>
+    <div>
+      <h1>Ledger</h1>
+      <p class="brand-sub">Sector-relative equity screener</p>
+    </div>
+  </div>
+  <div class="header-meta" id="headerMeta">
+    <span id="metaUniverse">— tickers</span>
+    <span class="meta-dot">·</span>
+    <span id="metaBuilt">—</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="filters" id="filters">
+    <div class="filter-group">
+      <label for="searchInput">Search</label>
+      <input type="text" id="searchInput" placeholder="Ticker or company name" autocomplete="off">
+    </div>
+
+    <div class="filter-group">
+      <label for="sectorSelect">Sector</label>
+      <select id="sectorSelect">
+        <option value="">All sectors</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="industrySelect">Sub-industry</label>
+      <select id="industrySelect">
+        <option value="">All sub-industries</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="tierSelect">Cap tier</label>
+      <select id="tierSelect">
+        <option value="">All tiers</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="starredOnly">
+        Starred only
+      </label>
+    </div>
+
+    <div class="filter-group industry-chart-group">
+      <label>Industry avg. PE — 5yr</label>
+      <p class="industry-chart-hint" id="industryChartHint">Select a sub-industry to plot its average trailing PE.</p>
+      <div class="chart-box" id="industryChartBox" hidden>
+        <canvas id="industryChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="filter-group watchlist-group">
+      <div class="watchlist-header">
+        <label>Starred (<span id="starCount">0</span>)</label>
+        <button class="text-btn" id="clearStars" type="button">clear</button>
+      </div>
+      <ul class="watchlist" id="watchlist">
+        <li class="watchlist-empty">Nothing starred yet.</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="results">
+    <div class="results-bar">
+      <span id="resultCount">0 results</span>
+      <div class="sort-controls">
+        <label for="sortSelect">Sort</label>
+        <select id="sortSelect">
+          <option value="fundamental_score_desc">Fundamental score ↓</option>
+          <option value="fundamental_score_asc">Fundamental score ↑</option>
+          <option value="market_cap_desc">Market cap ↓</option>
+          <option value="market_cap_asc">Market cap ↑</option>
+          <option value="pe_ratio_asc">PE ↑</option>
+          <option value="pe_ratio_desc">PE ↓</option>
+          <option value="ticker_asc">Ticker A–Z</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th class="col-star" aria-label="Star"></th>
+          <th>Ticker</th>
+          <th>Sector / Sub-industry</th>
+          <th>Cap tier</th>
+          <th class="col-num">Mkt cap</th>
+          <th class="col-num">PE</th>
+          <th class="col-num">ROE</th>
+          <th class="col-num">Fund. score</th>
+        </tr>
+      </thead>
+      <tbody id="stockTableBody">
+      </tbody>
+    </table>
+
+    <p class="empty-state" id="emptyState" hidden>No stocks match these filters. Loosen a filter to see more.</p>
+  </main>
+
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTicker">
+    <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTicker">—</h2>
+        <p id="modalName" class="modal-name">—</p>
+        <p id="modalMeta" class="modal-meta">—</p>
+      </div>
+      <button class="star-btn" id="modalStarBtn" type="button" aria-pressed="false">
+        <span class="star-icon">★</span> <span id="modalStarLabel">Star</span>
+      </button>
+    </div>
+
+    <div class="modal-stats">
+      <div><span class="stat-label">PE (trailing)</span><span class="stat-value" id="modalPE">—</span></div>
+      <div><span class="stat-label">ROE</span><span class="stat-value" id="modalROE">—</span></div>
+      <div><span class="stat-label">Market cap</span><span class="stat-value" id="modalCap">—</span></div>
+      <div><span class="stat-label">Fund. score</span><span class="stat-value" id="modalScore">—</span></div>
+    </div>
+
+    <h3 class="modal-chart-title">PE vs. sub-industry average — 5 years</h3>
+    <div class="chart-box modal-chart-box">
+      <canvas id="modalChart" height="220"></canvas>
+    </div>
+    <p class="modal-chart-note" id="modalChartNote"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "built_at": "2026-08-10T02:55:57.876232Z",
+  "universe_size": 42,
+  "pe_history_tickers": 42,
+  "years_of_pe_history": 5,
+  "is_sample_data": true,
+  "note": "Synthetic demo data. Run backend/build_data.py to generate real data."
+}
